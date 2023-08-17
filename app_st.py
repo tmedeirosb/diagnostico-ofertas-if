@@ -13,7 +13,7 @@ df = pd.read_csv("merge2018-tratado.csv")
 df = df[df['Tipo de Escola de Origem'].isin(['Pública', 'Privada'])]
 
 # Define the options for the attribute selection
-attributes_options = ['Código Curso', 'Campus', 'curso', 'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+attributes_options = ['Código Curso', 'Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
 
 # Tabs
 tabs = ["Agregação por Situação no Curso", "Interação entre variáveis"]
