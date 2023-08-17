@@ -16,7 +16,7 @@ df = df[df['Tipo de Escola de Origem'].isin(['Pública', 'Privada'])]
 attributes_options = ['Código Curso', 'Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
 
 # Tabs
-tabs = ["Agregação por Situação no Curso", "Interação entre variáveis"]
+tabs = ["Agregação por Situação no Curso", "Interação entre variáveis", "Detalhamento evasão"]
 selected_tab = st.sidebar.radio("Escolha uma aba:", tabs)
 
 if selected_tab == "Agregação por Situação no Curso":
@@ -127,3 +127,47 @@ elif selected_tab == "Interação entre variáveis":
             st.write(table)
         else:
             st.warning("Por favor, selecione valores para os atributos e situações.")
+
+elif selected_tab == "Detalhamento evasão":
+
+    st.title("Detalhamento evasão")
+    
+    # Filtros
+    campus = st.sidebar.selectbox('Campus', options=['Todos'] + list(df['Campus'].unique()))
+    curso = st.sidebar.selectbox('Curso', options=['Todos'] + list(df['curso'].unique()))
+    desc_curso = st.sidebar.selectbox('Descrição do Curso', options=['Todos'] + list(df['Descrição do Curso'].unique()))
+    ano_conclusao = st.sidebar.selectbox('Ano Letivo de Previsão de Conclusão', options=['Todos'] + list(df['Ano Letivo de Previsão de Conclusão'].unique()))
+    ano_ingresso = st.sidebar.selectbox('Ano de Ingresso', options=['Todos'] + list(df['Ano de Ingresso'].unique()))
+    periodo_atual = st.sidebar.selectbox('Período Atual', options=['Todos'] + list(df['Período Atual'].unique()))
+    modalidade = st.sidebar.selectbox('Modalidade', options=['Todos'] + list(df['Modalidade'].unique()))
+    tipo_escola = st.sidebar.selectbox('Tipo de Escola de Origem', options=['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
+    
+    # Filtrar os dados com base nos valores selecionados
+    filtered_data = df.copy()
+    if campus != 'Todos':
+        filtered_data = filtered_data[filtered_data['Campus'] == campus]
+    if curso != 'Todos':
+        filtered_data = filtered_data[filtered_data['curso'] == curso]
+    if desc_curso != 'Todos':
+        filtered_data = filtered_data[filtered_data['Descrição do Curso'] == desc_curso]
+    if ano_conclusao != 'Todos':
+        filtered_data = filtered_data[filtered_data['Ano Letivo de Previsão de Conclusão'] == ano_conclusao]
+    if ano_ingresso != 'Todos':
+        filtered_data = filtered_data[filtered_data['Ano de Ingresso'] == ano_ingresso]
+    if periodo_atual != 'Todos':
+        filtered_data = filtered_data[filtered_data['Período Atual'] == periodo_atual]
+    if modalidade != 'Todos':
+        filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade]
+    if tipo_escola != 'Todos':
+        filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == tipo_escola]
+    
+    # Gráfico de barras
+    st.subheader("Contagem de Ocorrências por Motivo")
+    motives = ["Principal motivo da ocorrência", "Motivo secundário da ocorrência", "Motivo terciário da ocorrência"]
+    counts = [filtered_data[motive].count() for motive in motives]
+    
+    plt.bar(motives, counts)
+    plt.xlabel('Motivos da Ocorrência')
+    plt.ylabel('Contagem')
+    plt.title('Contagem de Ocorrências por Motivo')
+    st.pyplot(plt)    
