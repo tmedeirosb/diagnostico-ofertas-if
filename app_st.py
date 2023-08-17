@@ -142,32 +142,50 @@ elif selected_tab == "Detalhamento evasão":
     modalidade = st.sidebar.selectbox('Modalidade', options=['Todos'] + list(df['Modalidade'].unique()))
     tipo_escola = st.sidebar.selectbox('Tipo de Escola de Origem', options=['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
     
-    # Filtrar os dados com base nos valores selecionados
-    filtered_data = df.copy()
-    if campus != 'Todos':
-        filtered_data = filtered_data[filtered_data['Campus'] == campus]
-    if curso != 'Todos':
-        filtered_data = filtered_data[filtered_data['curso'] == curso]
-    if desc_curso != 'Todos':
-        filtered_data = filtered_data[filtered_data['Descrição do Curso'] == desc_curso]
-    if ano_conclusao != 'Todos':
-        filtered_data = filtered_data[filtered_data['Ano Letivo de Previsão de Conclusão'] == ano_conclusao]
-    if ano_ingresso != 'Todos':
-        filtered_data = filtered_data[filtered_data['Ano de Ingresso'] == ano_ingresso]
-    if periodo_atual != 'Todos':
-        filtered_data = filtered_data[filtered_data['Período Atual'] == periodo_atual]
-    if modalidade != 'Todos':
-        filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade]
-    if tipo_escola != 'Todos':
-        filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == tipo_escola]
+    # Botão "Visualizar"
+    if st.sidebar.button('Visualizar'):
     
-    # Gráfico de barras
-    st.subheader("Contagem de Ocorrências por Motivo")
-    motives = ["Principal motivo da ocorrência", "Motivo secundário da ocorrência", "Motivo terciário da ocorrência"]
-    counts = [filtered_data[motive].count() for motive in motives]
-    
-    plt.bar(motives, counts)
-    plt.xlabel('Motivos da Ocorrência')
-    plt.ylabel('Contagem')
-    plt.title('Contagem de Ocorrências por Motivo')
-    st.pyplot(plt)    
+        # Filtrar os dados com base nos valores selecionados
+        filtered_data = df.copy()
+        if campus != 'Todos':
+            filtered_data = filtered_data[filtered_data['Campus'] == campus]
+        if curso != 'Todos':
+            filtered_data = filtered_data[filtered_data['curso'] == curso]
+        if desc_curso != 'Todos':
+            filtered_data = filtered_data[filtered_data['Descrição do Curso'] == desc_curso]
+        if ano_conclusao != 'Todos':
+            filtered_data = filtered_data[filtered_data['Ano Letivo de Previsão de Conclusão'] == ano_conclusao]
+        if ano_ingresso != 'Todos':
+            filtered_data = filtered_data[filtered_data['Ano de Ingresso'] == ano_ingresso]
+        if periodo_atual != 'Todos':
+            filtered_data = filtered_data[filtered_data['Período Atual'] == periodo_atual]
+        if modalidade != 'Todos':
+            filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade]
+        if tipo_escola != 'Todos':
+            filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == tipo_escola]
+        
+        # Gráfico de barras
+        st.subheader("Contagem de Ocorrências por Motivo")
+
+        # Concatenar os motivos de ocorrência em uma única série
+        all_motives = pd.concat([
+            filtered_data["Principal motivo da ocorrência_2"],
+            filtered_data["Motivo secundário da ocorrência"],
+            filtered_data["Motivo terciário da ocorrência"]
+        ])
+        
+        # Calcular a contagem de cada motivo único
+        motive_counts = all_motives.value_counts()
+        
+        # Selecionar os 10 motivos com a maior contagem
+        top_10_motives = motive_counts.nlargest(10)
+        
+        # Gráfico de barras
+        st.subheader("Contagem dos 10 Principais Motivos de Ocorrência")
+        
+        plt.bar(top_10_motives.index, top_10_motives.values)
+        plt.xlabel('Motivos da Ocorrência')
+        plt.ylabel('Contagem')
+        plt.title('Contagem dos 10 Principais Motivos de Ocorrência')
+        plt.xticks(rotation=45, ha='right')
+        st.pyplot(plt)
