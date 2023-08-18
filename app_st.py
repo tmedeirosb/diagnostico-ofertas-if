@@ -6,6 +6,33 @@ import matplotlib.pyplot as plt
 import numpy as np
 import datetime
 
+def plot_kde_renda(data, tipo):
+    """Generate a KDE plot for a given modalidade value."""
+
+    # Plotting the KDE
+    #palette = {"evasão": "red", "outro": "blue"}
+    plt.figure(figsize=(12, 6))
+
+    if tipo == 4:
+        sns.histplot(data=filtered_data, x="Renda Per Capita", hue="Situação no Curso",
+                     common_norm=True, kde=True) #, palette=palette)
+    if tipo == 6:
+        sns.histplot(data=filtered_data, x="Renda Per Capita", hue="Situação no Curso",
+                     element="step", stat="density", kde=True, common_norm=False) #, palette=palette)    
+    
+    # Configurar as marcas no eixo x
+    x_start = 0  
+    x_end = data['Renda Per Capita'].max() + 0.25  
+    x_step = 0.25
+    plt.xticks(np.arange(x_start, x_end, x_step), rotation=90)
+
+    plt.title(f"Distribuição da Renda por Status ({modalidade_value})")
+    plt.xlabel("Renda")
+    plt.ylabel("Densidade")
+    plt.tight_layout()
+    st.pyplot(plt)
+
+
 # Load the data
 df = pd.read_csv("merge2018-tratado.csv")
 
@@ -16,7 +43,8 @@ df = df[df['Tipo de Escola de Origem'].isin(['Pública', 'Privada'])]
 attributes_options = ['Código Curso', 'Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
 
 # Tabs
-tabs = ["Agregação por Situação no Curso", "Interação entre variáveis", "Detalhamento evasão"]
+tabs = ["Agregação por Situação no Curso", "Interação entre variáveis", "Detalhamento evasão", "Distribuição da Renda"]
+
 selected_tab = st.sidebar.radio("Escolha uma aba:", tabs)
 
 if selected_tab == "Agregação por Situação no Curso":
@@ -163,9 +191,6 @@ elif selected_tab == "Detalhamento evasão":
             filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade]
         if tipo_escola != 'Todos':
             filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == tipo_escola]
-        
-        # Gráfico de barras
-        st.subheader("Contagem de Ocorrências por Motivo")
 
         # Concatenar os motivos de ocorrência em uma única série
         all_motives = pd.concat([
@@ -189,3 +214,49 @@ elif selected_tab == "Detalhamento evasão":
         plt.title('Contagem dos 10 Principais Motivos de Ocorrência')
         plt.xticks(rotation=45, ha='right')
         st.pyplot(plt)
+
+elif selected_tab == "Distribuição da Renda":
+    st.title("Distribuição da Renda por Modalidade e Situação da Matrícula")
+
+    # Filtros no sidebar
+    situacao_curso = st.sidebar.multiselect('Situação no Curso', options=list(df['Situação no Curso'].unique()))
+    modalidade_value = st.sidebar.selectbox('Modalidade', options=['Todos'] + list(df['Modalidade'].unique()))
+
+    # Filtros
+    campus = st.sidebar.selectbox('Campus', options=['Todos'] + list(df['Campus'].unique()))
+    curso = st.sidebar.selectbox('Curso', options=['Todos'] + list(df['curso'].unique()))
+    desc_curso = st.sidebar.selectbox('Descrição do Curso', options=['Todos'] + list(df['Descrição do Curso'].unique()))
+    ano_conclusao = st.sidebar.selectbox('Ano Letivo de Previsão de Conclusão', options=['Todos'] + list(df['Ano Letivo de Previsão de Conclusão'].unique()))
+    ano_ingresso = st.sidebar.selectbox('Ano de Ingresso', options=['Todos'] + list(df['Ano de Ingresso'].unique()))
+    periodo_atual = st.sidebar.selectbox('Período Atual', options=['Todos'] + list(df['Período Atual'].unique()))
+    tipo_escola = st.sidebar.selectbox('Tipo de Escola de Origem', options=['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
+    
+    # Botão "Visualizar"
+    if st.button('Visualizar'):
+
+        # Filtrar os dados com base nos valores selecionados
+        filtered_data = df.copy()
+        if campus != 'Todos':
+            filtered_data = filtered_data[filtered_data['Campus'] == campus]
+        if curso != 'Todos':
+            filtered_data = filtered_data[filtered_data['curso'] == curso]
+        if desc_curso != 'Todos':
+            filtered_data = filtered_data[filtered_data['Descrição do Curso'] == desc_curso]
+        if ano_conclusao != 'Todos':
+            filtered_data = filtered_data[filtered_data['Ano Letivo de Previsão de Conclusão'] == ano_conclusao]
+        if ano_ingresso != 'Todos':
+            filtered_data = filtered_data[filtered_data['Ano de Ingresso'] == ano_ingresso]
+        if periodo_atual != 'Todos':
+            filtered_data = filtered_data[filtered_data['Período Atual'] == periodo_atual]
+        if modalidade_value != 'Todos':
+            filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade_value]
+        if tipo_escola != 'Todos':
+            filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == tipo_escola]
+        if situacao_curso:
+            filtered_data = df[df['Situação no Curso'].isin(situacao_curso)]
+
+
+        # Chamar a função para gerar o gráfico
+        plot_kde_renda(filtered_data, 4)
+
+        plot_kde_renda(filtered_data, 6)
