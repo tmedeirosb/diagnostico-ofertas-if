@@ -55,7 +55,8 @@ df = df[df['Tipo de Escola de Origem'].isin(['Pública', 'Privada'])]
 attributes_options = ['Código Curso', 'Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
 
 # Tabs
-tabs = ["Agregação por Situação no Curso", "Interação entre variáveis", "Detalhamento evasão", "Distribuição da Renda"]
+tabs = ["Agregação por Situação no Curso", "Interação entre variáveis", "Detalhamento evasão", "Distribuição da Renda", 
+        "Egressos: Avaliação do Curso"]
 
 selected_tab = st.sidebar.radio("Escolha uma aba:", tabs)
 
@@ -272,3 +273,77 @@ elif selected_tab == "Distribuição da Renda":
         plot_kde_renda(filtered_data, 4)
         plot_kde_renda(filtered_data, 6)
         plot_boxplot_renda(filtered_data)
+
+elif selected_tab == "Egressos: Avaliação do Curso":
+
+    st.title("Egressos: Avaliação do Curso")
+
+    # Filtros
+    campus = st.sidebar.selectbox('Campus', options=['Todos'] + list(df['Campus'].unique()))
+    curso = st.sidebar.selectbox('Curso', options=['Todos'] + list(df['curso'].unique()))
+    desc_curso = st.sidebar.selectbox('Descrição do Curso', options=['Todos'] + list(df['Descrição do Curso'].unique()))
+    ano_conclusao = st.sidebar.selectbox('Ano Letivo de Previsão de Conclusão', options=['Todos'] + list(df['Ano Letivo de Previsão de Conclusão'].unique()))
+    ano_ingresso = st.sidebar.selectbox('Ano de Ingresso', options=['Todos'] + list(df['Ano de Ingresso'].unique()))
+    periodo_atual = st.sidebar.selectbox('Período Atual', options=['Todos'] + list(df['Período Atual'].unique()))
+    modalidade = st.sidebar.selectbox('Modalidade', options=['Todos'] + list(df['Modalidade'].unique()))
+    tipo_escola = st.sidebar.selectbox('Tipo de Escola de Origem', options=['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
+    
+    # Sidebar
+    eg_columns = ['CURSO_ENSINO_APRENDIZAGEM', 'CURSO_HABIL_COMPETE', 'CURSO_TEORIA', 
+                  'CURSO_PRATICA', 'CURSO_AVALIACAO', 'CURSO_VIDA_PROFISSAO', 
+                  'CURSO_PERSPECTIVAS', 'CURSO_VIDA_QUALIDADE']
+    
+    st.sidebar.header('Filtro de colunas do Egresso')
+    options = st.sidebar.selectbox('Escolha a coluna para visualizar', eg_columns)
+
+    # Filters
+    #attribute_values_1 = st.sidebar.multiselect(f'Valores para {options}:', df[options].unique())
+
+    hue_columns = ['Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 
+                   'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+
+    # Hue parameter
+    hue_option = st.sidebar.selectbox('Escolha o atributo para o agregar (opcional)', ['Nenhum'] + hue_columns)
+
+    # Botão "Visualizar"
+    if st.button('Visualizar'):
+
+        # Filtrar os dados com base nos valores selecionados
+        filtered_data = df.copy()
+        if campus != 'Todos':
+            filtered_data = filtered_data[filtered_data['Campus'] == campus]
+        if curso != 'Todos':
+            filtered_data = filtered_data[filtered_data['curso'] == curso]
+        if desc_curso != 'Todos':
+            filtered_data = filtered_data[filtered_data['Descrição do Curso'] == desc_curso]
+        if ano_conclusao != 'Todos':
+            filtered_data = filtered_data[filtered_data['Ano Letivo de Previsão de Conclusão'] == ano_conclusao]
+        if ano_ingresso != 'Todos':
+            filtered_data = filtered_data[filtered_data['Ano de Ingresso'] == ano_ingresso]
+        if periodo_atual != 'Todos':
+            filtered_data = filtered_data[filtered_data['Período Atual'] == periodo_atual]
+        if modalidade != 'Todos':
+            filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade]
+
+        # Display a bar plot
+        st.header('Gráfico de Barras')
+        fig, ax = plt.subplots(figsize=(10,5))
+        if hue_option != 'Nenhum':
+            plot = sns.countplot(data=filtered_data, x=options, hue=hue_option, ax=ax)
+        else:
+            plot = sns.countplot(data=filtered_data, x=options, ax=ax)
+
+        plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
+
+        # Add the values on top of each bar
+        for p in plot.patches:
+            plot.annotate(format(p.get_height(), '.0f'), 
+                        (p.get_x() + p.get_width() / 2., p.get_height()), 
+                        ha = 'center', 
+                        va = 'center', 
+                        xytext = (0, 10), 
+                        textcoords = 'offset points')
+
+        st.pyplot(fig)
+
+        
