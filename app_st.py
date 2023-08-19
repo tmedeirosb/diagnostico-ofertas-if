@@ -16,9 +16,11 @@ def plot_kde_renda(data, tipo):
     if tipo == 4:
         sns.histplot(data=data, x="Renda Per Capita", hue="Situação no Curso",
                      common_norm=True, kde=True) #, palette=palette)
+        plt.ylabel("Contagem")
     if tipo == 6:
         sns.histplot(data=data, x="Renda Per Capita", hue="Situação no Curso",
-                     element="step", stat="density", kde=True, common_norm=False) #, palette=palette)    
+                     element="step", stat="density", kde=True, common_norm=False) #, palette=palette)  
+        plt.ylabel("Densidade")  
     
     # Configurar as marcas no eixo x
     x_start = 0  
@@ -26,9 +28,9 @@ def plot_kde_renda(data, tipo):
     x_step = 0.25
     plt.xticks(np.arange(x_start, x_end, x_step), rotation=90)
 
-    plt.title(f"Distribuição da Renda por Status ({modalidade_value})")
+    plt.title(f"Distribuição da Renda por Situação do Curso")
     plt.xlabel("Renda")
-    plt.ylabel("Densidade")
+    
     plt.tight_layout()
     st.pyplot(plt)
 
@@ -43,7 +45,52 @@ def plot_boxplot_renda(data):
     #plt.tight_layout()
     st.pyplot(plt)
 
+def show_filtros(df):
+    # Filtros
+    st.sidebar.header("Filtros")
+    modalidade_value = st.sidebar.selectbox('Modalidade', options=['Todos'] + list(df['Modalidade'].unique()))
+    campus = st.sidebar.selectbox('Campus', options=['Todos'] + list(df['Campus'].unique()))
+    curso = st.sidebar.selectbox('Curso', options=['Todos'] + list(df['curso'].unique()))
+    desc_curso = st.sidebar.selectbox('Descrição do Curso', options=['Todos'] + list(df['Descrição do Curso'].unique()))
+    ano_conclusao = st.sidebar.selectbox('Ano Letivo de Previsão de Conclusão', options=['Todos'] + list(df['Ano Letivo de Previsão de Conclusão'].unique()))
+    ano_ingresso = st.sidebar.selectbox('Ano de Ingresso', options=['Todos'] + list(df['Ano de Ingresso'].unique()))
+    periodo_atual = st.sidebar.selectbox('Período Atual', options=['Todos'] + list(df['Período Atual'].unique()))
+    tipo_escola = st.sidebar.selectbox('Tipo de Escola de Origem', options=['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
 
+    return {"modalidade_value": modalidade_value, 
+            "campus": campus, 
+            "curso": curso, 
+            "desc_curso": desc_curso, 
+            "ano_conclusao": ano_conclusao, 
+            "ano_ingresso": ano_ingresso, 
+            "periodo_atual": periodo_atual, 
+            "tipo_escola": tipo_escola}
+
+def apply_filtros(df, var):
+    # Filtrar os dados com base nos valores selecionados
+
+    #st.write(var)
+
+    filtered_data = df.copy()
+    if var['campus'] != 'Todos':
+        filtered_data = filtered_data[filtered_data['Campus'] == var['campus']]
+    if var['curso'] != 'Todos':
+        filtered_data = filtered_data[filtered_data['curso'] == var['curso']]
+    if var['desc_curso'] != 'Todos':
+        filtered_data = filtered_data[filtered_data['Descrição do Curso'] == var['desc_curso']]
+    if var['ano_conclusao'] != 'Todos':
+        filtered_data = filtered_data[filtered_data['Ano Letivo de Previsão de Conclusão'] == var['ano_conclusao']]
+    if var['ano_ingresso'] != 'Todos':
+        filtered_data = filtered_data[filtered_data['Ano de Ingresso'] == var['ano_ingresso']]
+    if var['periodo_atual'] != 'Todos':
+        filtered_data = filtered_data[filtered_data['Período Atual'] == var['periodo_atual']]
+    if var['modalidade_value'] != 'Todos':
+        filtered_data = filtered_data[filtered_data['Modalidade'] == var['modalidade_value']]
+    if var['tipo_escola'] != 'Todos':
+        filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == var['tipo_escola']] 
+
+    return filtered_data
+        
 
 # Load the data
 df = pd.read_csv("merge2018-tratado.csv")
@@ -52,35 +99,56 @@ df = pd.read_csv("merge2018-tratado.csv")
 df = df[df['Tipo de Escola de Origem'].isin(['Pública', 'Privada'])]
 
 # Define the options for the attribute selection
-attributes_options = ['Código Curso', 'Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+attributes_options = ['Código Curso', 'Campus', 'curso', 'Descrição do Curso', 
+                      'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 
+                      'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
 
 # Tabs
-tabs = ["Agregação por Situação no Curso", "Interação entre variáveis", "Detalhamento evasão", "Distribuição da Renda", 
-        "Egressos: Avaliação do Curso"]
+tabs = [
+    "Sobre", 
+    "Evasão/Retenção: Geral", 
+    "Evasão/Retenção: Detalhado", 
+        "Evasão/Retenção: Renda", 
+        "Evasão: Motivação", 
+        "Egressos: Avaliação do Curso", 
+        ]
 
 selected_tab = st.sidebar.radio("Escolha uma aba:", tabs)
 
-if selected_tab == "Agregação por Situação no Curso":
+if selected_tab == "Sobre":
+    qnt_registros = st.sidebar.slider('Selecione o número de registros:', 0, 1000, 10, 10)
+    vars_filtros = show_filtros(df)
+
+    st.title("Exibição dos dados")
+
+    # Botão "Visualizar"
+    if st.button('Visualizar'):
+        filtered_data = apply_filtros(df, vars_filtros)
+        st.write(filtered_data.drop('Unnamed: 0', axis='columns').head(qnt_registros))
+
+elif selected_tab == "Evasão/Retenção: Geral":
+    st.title("Evasão/Retenção: Geral")
 
     # Add multiselect for the user to choose filters (with "Nenhum" option)
-    modalidade = st.sidebar.selectbox('Selecione a modalidade:', ['Nenhum'] + list(df['Modalidade'].unique()))
-    tipo_escola_origem = st.sidebar.selectbox('Selecione o tipo de escola de origem:', ['Nenhum'] + list(df['Tipo de Escola de Origem'].unique()))
     situacoes_to_display = st.sidebar.multiselect('Selecione as situações a serem exibidas:', list(df['Situação no Curso'].unique()))
-
-    # Apply filters based on the selected options (skip if "Nenhum" is selected)
-    if modalidade != 'Nenhum':
-        df = df[df['Modalidade'] == modalidade]
-    if tipo_escola_origem != 'Nenhum':
-        df = df[df['Tipo de Escola de Origem'] == tipo_escola_origem]
 
     # Add a selectbox for the user to choose between absolute values and percentage
     values_or_percentage = st.sidebar.selectbox('Selecione a forma de exibição:', ['Valores Absolutos', 'Porcentagem'])
+
+    modalidade = st.sidebar.selectbox('Selecione a modalidade:', ['Todos'] + list(df['Modalidade'].unique()))
+    tipo_escola_origem = st.sidebar.selectbox('Selecione o tipo de escola de origem:', ['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
+
+    # Apply filters based on the selected options (skip if "Todos" is selected)
+    if modalidade != 'Todos':
+        df = df[df['Modalidade'] == modalidade]
+    if tipo_escola_origem != 'Todos':
+        df = df[df['Tipo de Escola de Origem'] == tipo_escola_origem]
 
     # Add selectbox for the user to choose one attribute
     attribute1 = st.sidebar.selectbox('Selecione o atributo:', attributes_options)
 
     # Add a "Visualizar" button
-    visualizar = st.sidebar.button('Visualizar')
+    visualizar = st.button('Visualizar')
 
     # Variable to store table data
     table_data = None
@@ -119,8 +187,10 @@ if selected_tab == "Agregação por Situação no Curso":
             table_data.loc['Total'] = table_data.sum()
             st.write(table_data)
 
-elif selected_tab == "Interação entre variáveis":
+elif selected_tab == "Evasão/Retenção: Detalhado":
     
+    st.title("Evasão/Retenção: Detalhado")
+
     st.sidebar.header("Visualização")
     # Situação do curso
     situations = st.sidebar.multiselect('Selecione as situações do curso:', df['Situação no Curso'].unique())
@@ -141,7 +211,7 @@ elif selected_tab == "Interação entre variáveis":
         attribute_values_2 = []
 
     # Botão para visualizar
-    if st.sidebar.button('Visualizar'):
+    if st.button('Visualizar'):
         if attribute_values_1 and attribute_values_2 and situations:
             fig, ax = plt.subplots(figsize=(15, 10))
             data = df[df[attribute1].isin(attribute_values_1) & df[attribute2].isin(attribute_values_2) & df['Situação no Curso'].isin(situations)]
@@ -169,41 +239,45 @@ elif selected_tab == "Interação entre variáveis":
         else:
             st.warning("Por favor, selecione valores para os atributos e situações.")
 
-elif selected_tab == "Detalhamento evasão":
+elif selected_tab == "Evasão/Retenção: Renda":
+    st.title("Distribuição da Renda por Situação da Matrícula")
 
-    st.title("Detalhamento evasão")
+    # Visualizacao no sidebar
+    st.sidebar.header("Visualização")
+    situacao_curso = st.sidebar.multiselect('Situação no Curso', options=list(df['Situação no Curso'].unique()))
     
     # Filtros
-    campus = st.sidebar.selectbox('Campus', options=['Todos'] + list(df['Campus'].unique()))
-    curso = st.sidebar.selectbox('Curso', options=['Todos'] + list(df['curso'].unique()))
-    desc_curso = st.sidebar.selectbox('Descrição do Curso', options=['Todos'] + list(df['Descrição do Curso'].unique()))
-    ano_conclusao = st.sidebar.selectbox('Ano Letivo de Previsão de Conclusão', options=['Todos'] + list(df['Ano Letivo de Previsão de Conclusão'].unique()))
-    ano_ingresso = st.sidebar.selectbox('Ano de Ingresso', options=['Todos'] + list(df['Ano de Ingresso'].unique()))
-    periodo_atual = st.sidebar.selectbox('Período Atual', options=['Todos'] + list(df['Período Atual'].unique()))
-    modalidade = st.sidebar.selectbox('Modalidade', options=['Todos'] + list(df['Modalidade'].unique()))
-    tipo_escola = st.sidebar.selectbox('Tipo de Escola de Origem', options=['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
+    vars_filtros = show_filtros(df)
+
+    # Botão "Visualizar"
+    if st.button('Visualizar'):
+        # Filtrar os dados com base nos valores selecionados
+        filtered_data = apply_filtros(df, vars_filtros)
+
+        if situacao_curso:
+            filtered_data = filtered_data[filtered_data['Situação no Curso'].isin(situacao_curso)]
+
+
+        # Chamar a função para gerar o gráfico
+        plot_kde_renda(filtered_data, 4)
+        plot_kde_renda(filtered_data, 6)
+        plot_boxplot_renda(filtered_data)
+
+elif selected_tab == "Evasão: Motivação":
+
+    st.title("Evasão: Motivação")
+    
+    #quantidade de motivos
+    qnt_registros = st.sidebar.slider('Selecione o número de registros:', 2, 20, 2)
+
+    # Filtros
+    vars_filtros = show_filtros(df)
     
     # Botão "Visualizar"
-    if st.sidebar.button('Visualizar'):
+    if st.button('Visualizar'):
     
         # Filtrar os dados com base nos valores selecionados
-        filtered_data = df.copy()
-        if campus != 'Todos':
-            filtered_data = filtered_data[filtered_data['Campus'] == campus]
-        if curso != 'Todos':
-            filtered_data = filtered_data[filtered_data['curso'] == curso]
-        if desc_curso != 'Todos':
-            filtered_data = filtered_data[filtered_data['Descrição do Curso'] == desc_curso]
-        if ano_conclusao != 'Todos':
-            filtered_data = filtered_data[filtered_data['Ano Letivo de Previsão de Conclusão'] == ano_conclusao]
-        if ano_ingresso != 'Todos':
-            filtered_data = filtered_data[filtered_data['Ano de Ingresso'] == ano_ingresso]
-        if periodo_atual != 'Todos':
-            filtered_data = filtered_data[filtered_data['Período Atual'] == periodo_atual]
-        if modalidade != 'Todos':
-            filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade]
-        if tipo_escola != 'Todos':
-            filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == tipo_escola]
+        filtered_data = apply_filtros(df, vars_filtros)
 
         # Concatenar os motivos de ocorrência em uma única série
         all_motives = pd.concat([
@@ -216,77 +290,21 @@ elif selected_tab == "Detalhamento evasão":
         motive_counts = all_motives.value_counts()
         
         # Selecionar os 10 motivos com a maior contagem
-        top_10_motives = motive_counts.nlargest(10)
-        
-        # Gráfico de barras
-        st.subheader("Contagem dos 10 Principais Motivos de Ocorrência")
-        
+        top_10_motives = motive_counts.nlargest(qnt_registros)
+                
         plt.bar(top_10_motives.index, top_10_motives.values)
         plt.xlabel('Motivos da Ocorrência')
         plt.ylabel('Contagem')
-        plt.title('Contagem dos 10 Principais Motivos de Ocorrência')
+        plt.title(f'Contagem dos {qnt_registros} Principais Motivos de Ocorrência')
         plt.xticks(rotation=45, ha='right')
         st.pyplot(plt)
-
-elif selected_tab == "Distribuição da Renda":
-    st.title("Distribuição da Renda por Modalidade e Situação da Matrícula")
-
-    # Filtros no sidebar
-    situacao_curso = st.sidebar.multiselect('Situação no Curso', options=list(df['Situação no Curso'].unique()))
-    modalidade_value = st.sidebar.selectbox('Modalidade', options=['Todos'] + list(df['Modalidade'].unique()))
-
-    # Filtros
-    campus = st.sidebar.selectbox('Campus', options=['Todos'] + list(df['Campus'].unique()))
-    curso = st.sidebar.selectbox('Curso', options=['Todos'] + list(df['curso'].unique()))
-    desc_curso = st.sidebar.selectbox('Descrição do Curso', options=['Todos'] + list(df['Descrição do Curso'].unique()))
-    ano_conclusao = st.sidebar.selectbox('Ano Letivo de Previsão de Conclusão', options=['Todos'] + list(df['Ano Letivo de Previsão de Conclusão'].unique()))
-    ano_ingresso = st.sidebar.selectbox('Ano de Ingresso', options=['Todos'] + list(df['Ano de Ingresso'].unique()))
-    periodo_atual = st.sidebar.selectbox('Período Atual', options=['Todos'] + list(df['Período Atual'].unique()))
-    tipo_escola = st.sidebar.selectbox('Tipo de Escola de Origem', options=['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
-    
-    # Botão "Visualizar"
-    if st.button('Visualizar'):
-
-        # Filtrar os dados com base nos valores selecionados
-        filtered_data = df.copy()
-        if campus != 'Todos':
-            filtered_data = filtered_data[filtered_data['Campus'] == campus]
-        if curso != 'Todos':
-            filtered_data = filtered_data[filtered_data['curso'] == curso]
-        if desc_curso != 'Todos':
-            filtered_data = filtered_data[filtered_data['Descrição do Curso'] == desc_curso]
-        if ano_conclusao != 'Todos':
-            filtered_data = filtered_data[filtered_data['Ano Letivo de Previsão de Conclusão'] == ano_conclusao]
-        if ano_ingresso != 'Todos':
-            filtered_data = filtered_data[filtered_data['Ano de Ingresso'] == ano_ingresso]
-        if periodo_atual != 'Todos':
-            filtered_data = filtered_data[filtered_data['Período Atual'] == periodo_atual]
-        if modalidade_value != 'Todos':
-            filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade_value]
-        if tipo_escola != 'Todos':
-            filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == tipo_escola]
-        if situacao_curso:
-            filtered_data = df[df['Situação no Curso'].isin(situacao_curso)]
-
-
-        # Chamar a função para gerar o gráfico
-        plot_kde_renda(filtered_data, 4)
-        plot_kde_renda(filtered_data, 6)
-        plot_boxplot_renda(filtered_data)
 
 elif selected_tab == "Egressos: Avaliação do Curso":
 
     st.title("Egressos: Avaliação do Curso")
 
     # Filtros
-    campus = st.sidebar.selectbox('Campus', options=['Todos'] + list(df['Campus'].unique()))
-    curso = st.sidebar.selectbox('Curso', options=['Todos'] + list(df['curso'].unique()))
-    desc_curso = st.sidebar.selectbox('Descrição do Curso', options=['Todos'] + list(df['Descrição do Curso'].unique()))
-    ano_conclusao = st.sidebar.selectbox('Ano Letivo de Previsão de Conclusão', options=['Todos'] + list(df['Ano Letivo de Previsão de Conclusão'].unique()))
-    ano_ingresso = st.sidebar.selectbox('Ano de Ingresso', options=['Todos'] + list(df['Ano de Ingresso'].unique()))
-    periodo_atual = st.sidebar.selectbox('Período Atual', options=['Todos'] + list(df['Período Atual'].unique()))
-    modalidade = st.sidebar.selectbox('Modalidade', options=['Todos'] + list(df['Modalidade'].unique()))
-    tipo_escola = st.sidebar.selectbox('Tipo de Escola de Origem', options=['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
+    vars_filtros = show_filtros(df)
     
     # Sidebar
     eg_columns = ['CURSO_ENSINO_APRENDIZAGEM', 'CURSO_HABIL_COMPETE', 'CURSO_TEORIA', 
@@ -309,24 +327,9 @@ elif selected_tab == "Egressos: Avaliação do Curso":
     if st.button('Visualizar'):
 
         # Filtrar os dados com base nos valores selecionados
-        filtered_data = df.copy()
-        if campus != 'Todos':
-            filtered_data = filtered_data[filtered_data['Campus'] == campus]
-        if curso != 'Todos':
-            filtered_data = filtered_data[filtered_data['curso'] == curso]
-        if desc_curso != 'Todos':
-            filtered_data = filtered_data[filtered_data['Descrição do Curso'] == desc_curso]
-        if ano_conclusao != 'Todos':
-            filtered_data = filtered_data[filtered_data['Ano Letivo de Previsão de Conclusão'] == ano_conclusao]
-        if ano_ingresso != 'Todos':
-            filtered_data = filtered_data[filtered_data['Ano de Ingresso'] == ano_ingresso]
-        if periodo_atual != 'Todos':
-            filtered_data = filtered_data[filtered_data['Período Atual'] == periodo_atual]
-        if modalidade != 'Todos':
-            filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade]
+        filtered_data = apply_filtros(df, vars_filtros)
 
         # Display a bar plot
-        st.header('Gráfico de Barras')
         fig, ax = plt.subplots(figsize=(10,5))
         if hue_option != 'Nenhum':
             plot = sns.countplot(data=filtered_data, x=options, hue=hue_option, ax=ax)
