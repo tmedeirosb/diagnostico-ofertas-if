@@ -99,7 +99,7 @@ df = pd.read_csv("merge2018-tratado.csv")
 df = df[df['Tipo de Escola de Origem'].isin(['Pública', 'Privada'])]
 
 # Define the options for the attribute selection
-attributes_options = ['Código Curso', 'Campus', 'curso', 'Descrição do Curso', 
+attributes_options = ['Campus', 'curso', 'Descrição do Curso', 
                       'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 
                       'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
 
@@ -196,18 +196,14 @@ elif selected_tab == "Evasão/Retenção: Detalhado":
     st.title("Evasão/Retenção: Detalhado")
 
     st.sidebar.header("Visualização")
-    # Situação do curso
-    situations = st.sidebar.multiselect('Selecione as situações do curso:', df['Situação no Curso'].unique())
-
     # Valores absolutos ou porcentagem
     values_or_percentage = st.sidebar.selectbox('Selecione a forma de exibição:', ['Valores Absolutos', 'Porcentagem'])
     
-    st.sidebar.header("Interação variáveis")
+    st.sidebar.header("Interação entre variáveis")
     # Seleção de atributos para interação
     attribute1 = st.sidebar.selectbox('Seleção do atributo 1:', attributes_options)
     attribute_values_1 = st.sidebar.multiselect(f'Valores para {attribute1}:', df[attribute1].unique())
     
-    #attribute2 = st.sidebar.selectbox('Seleção do atributo 2:', attributes_options)
     attribute2 = st.sidebar.selectbox('Selecione o segundo atributo (Opcional):', options=['Nenhum'] + attributes_options, index=0)
 
     if attribute_values_1:
@@ -221,12 +217,11 @@ elif selected_tab == "Evasão/Retenção: Detalhado":
     if st.button('Visualizar'):
 
         if attribute2 == 'Nenhum':
-            if attribute_values_1 and situations:
+            if attribute_values_1:
                 fig, ax = plt.subplots(figsize=(15, 10))
                 data = df[df[attribute1].isin(attribute_values_1)]
 
-                if values_or_percentage == 'Valores Absolutos':
-                    data = data[data['Situação no Curso'].isin(situations)]
+                if values_or_percentage == 'Valores Absolutos':                    
                     sns.countplot(data=data, x=attribute1, hue='Situação no Curso', ax=ax)
                 else:
                     # This will be a bit complex for percentage, as we'll need to compute the percentage per each situation
@@ -250,14 +245,13 @@ elif selected_tab == "Evasão/Retenção: Detalhado":
                 table.loc['Total'] = table.sum()
                 st.write(table) 
             else:
-                st.error("Por favor, selecione valores para os atributos e situações.")           
+                st.error("Por favor, selecione valores para os atributos.")           
 
         else:
-            if attribute_values_1 and attribute_values_2 and situations:
+            if attribute_values_1 and attribute_values_2:
                 fig, ax = plt.subplots(figsize=(15, 10))
                 data = df[df[attribute1].isin(attribute_values_1) & df[attribute2].isin(attribute_values_2)]
                 if values_or_percentage == 'Valores Absolutos':
-                    data = data[data['Situação no Curso'].isin(situations)]
                     sns.countplot(data=data, x=attribute2, hue='Situação no Curso', ax=ax)
                 else:
                     # This will be a bit complex for percentage, as we'll need to compute the percentage per each situation
@@ -281,7 +275,7 @@ elif selected_tab == "Evasão/Retenção: Detalhado":
                 table.loc['Total'] = table.sum()
                 st.write(table)
             else:
-                st.error("Por favor, selecione valores para os atributos e situações.")
+                st.error("Por favor, selecione valores para os atributos.")
 
 elif selected_tab == "Evasão/Retenção: Renda":
     st.title("Distribuição da Renda por Situação da Matrícula")
