@@ -14,10 +14,10 @@ def plot_kde_renda(data, tipo):
     plt.figure(figsize=(12, 6))
 
     if tipo == 4:
-        sns.histplot(data=filtered_data, x="Renda Per Capita", hue="Situação no Curso",
+        sns.histplot(data=data, x="Renda Per Capita", hue="Situação no Curso",
                      common_norm=True, kde=True) #, palette=palette)
     if tipo == 6:
-        sns.histplot(data=filtered_data, x="Renda Per Capita", hue="Situação no Curso",
+        sns.histplot(data=data, x="Renda Per Capita", hue="Situação no Curso",
                      element="step", stat="density", kde=True, common_norm=False) #, palette=palette)    
     
     # Configurar as marcas no eixo x
@@ -31,6 +31,18 @@ def plot_kde_renda(data, tipo):
     plt.ylabel("Densidade")
     plt.tight_layout()
     st.pyplot(plt)
+
+def plot_boxplot_renda(data):
+    plt.figure(figsize=(12, 6))
+
+    sns.violinplot(data=data, x="Situação no Curso", y="Renda Per Capita", hue="Tipo de Escola de Origem", split=True)
+
+    plt.title(f"Violino da Renda por Situação no Curso e Tipo de Escola de Origem")
+    #plt.xlabel("Renda")
+    #plt.ylabel("Densidade")
+    #plt.tight_layout()
+    st.pyplot(plt)
+
 
 
 # Load the data
@@ -258,5 +270,5 @@ elif selected_tab == "Distribuição da Renda":
 
         # Chamar a função para gerar o gráfico
         plot_kde_renda(filtered_data, 4)
-
         plot_kde_renda(filtered_data, 6)
+        plot_boxplot_renda(filtered_data)
