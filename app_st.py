@@ -105,12 +105,16 @@ attributes_options = ['Campus', 'curso', 'Descrição do Curso',
 
 # Tabs
 tabs = [
-    "Sobre", 
-    "Evasão/Retenção: Geral", 
-    "Evasão/Retenção: Detalhado", 
+        "Sobre", 
+        "Evasão/Retenção: Geral", 
+        "Evasão/Retenção: Detalhado", 
         "Evasão/Retenção: Renda", 
         "Evasão: Motivação", 
         "Egressos: Avaliação do Curso", 
+        "Egressos: Prática", 
+        "Egressos: Escolaridade", 
+        "Egressos: Estudo Relação", 
+        "Egressos: Trabalho"
         ]
 
 selected_tab = st.sidebar.radio("Escolha uma aba:", tabs)
@@ -349,8 +353,8 @@ elif selected_tab == "Egressos: Avaliação do Curso":
                   'CURSO_PRATICA', 'CURSO_AVALIACAO', 'CURSO_VIDA_PROFISSAO', 
                   'CURSO_PERSPECTIVAS', 'CURSO_VIDA_QUALIDADE']
     
-    st.sidebar.header('Filtro de colunas do Egresso')
-    options = st.sidebar.selectbox('Escolha a coluna para visualizar', eg_columns)
+    #st.sidebar.header('Filtro de colunas do Egresso')
+    #options = st.sidebar.selectbox('Escolha a coluna para visualizar', eg_columns)
 
     # Filters
     #attribute_values_1 = st.sidebar.multiselect(f'Valores para {options}:', df[options].unique())
@@ -359,7 +363,7 @@ elif selected_tab == "Egressos: Avaliação do Curso":
                    'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
 
     # Hue parameter
-    hue_option = st.sidebar.selectbox('Escolha o atributo para o agregar (opcional)', ['Nenhum'] + hue_columns)
+    hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)
 
     # Botão "Visualizar"
     if st.button('Visualizar'):
@@ -367,24 +371,211 @@ elif selected_tab == "Egressos: Avaliação do Curso":
         # Filtrar os dados com base nos valores selecionados
         filtered_data = apply_filtros(df, vars_filtros)
 
-        # Display a bar plot
-        fig, ax = plt.subplots(figsize=(10,5))
-        if hue_option != 'Nenhum':
-            plot = sns.countplot(data=filtered_data, x=options, hue=hue_option, ax=ax)
-        else:
-            plot = sns.countplot(data=filtered_data, x=options, ax=ax)
+        for option in eg_columns:
+            # Display a bar plot
+            fig, ax = plt.subplots(figsize=(10,5))
+            plt.title(f'Satisfação do atributo {option}')
+            if hue_option != 'Nenhum':
+                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
+            else:
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax)
 
-        plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
+            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
 
-        # Add the values on top of each bar
-        for p in plot.patches:
-            plot.annotate(format(p.get_height(), '.0f'), 
-                        (p.get_x() + p.get_width() / 2., p.get_height()), 
-                        ha = 'center', 
-                        va = 'center', 
-                        xytext = (0, 10), 
-                        textcoords = 'offset points')
+            # Add the values on top of each bar
+            for p in plot.patches:
+                plot.annotate(format(p.get_height(), '.0f'), 
+                            (p.get_x() + p.get_width() / 2., p.get_height()), 
+                            ha = 'center', 
+                            va = 'center', 
+                            xytext = (0, 10), 
+                            textcoords = 'offset points')
 
-        st.pyplot(fig)
-
+            st.pyplot(fig)
         
+elif selected_tab == "Egressos: Prática":
+
+    st.title("Egressos: Prática")
+
+    # Filtros
+    vars_filtros = show_filtros(df)
+    
+    # Sidebar
+    eg_columns = ['PRATICA_TIPO_1', 'PRATICA_TIPO_2', 'PRATICA_TIPO_3', 'PRATICA_TIPO_4',
+                  'PRATICA_REALIZACAO', 'PRATICA_CONHECIMENTOS',
+                  'PRATICA_ORIENTACAO', 'PRATICA_AREA_PROFISSAO']
+    
+    hue_columns = ['Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 
+                   'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+
+    # Hue parameter
+    hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)
+
+    # Botão "Visualizar"
+    if st.button('Visualizar'):
+
+        # Filtrar os dados com base nos valores selecionados
+        filtered_data = apply_filtros(df, vars_filtros)
+
+        for option in eg_columns:
+            # Display a bar plot
+            fig, ax = plt.subplots(figsize=(10,5))
+            plt.title(f'Contagem do atributo {option}')
+            if hue_option != 'Nenhum':
+                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
+            else:
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax)
+
+            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
+
+            # Add the values on top of each bar
+            for p in plot.patches:
+                plot.annotate(format(p.get_height(), '.0f'), 
+                            (p.get_x() + p.get_width() / 2., p.get_height()), 
+                            ha = 'center', 
+                            va = 'center', 
+                            xytext = (0, 10), 
+                            textcoords = 'offset points')
+
+            st.pyplot(fig)
+
+elif selected_tab == "Egressos: Escolaridade":
+
+    st.title("Egressos: Escolaridade")
+
+    # Filtros
+    vars_filtros = show_filtros(df)
+    
+    # Sidebar
+    eg_columns = ['ESCOLARIDADE_NIVEL', 'ESCOLARIDADE_IF']
+    
+    hue_columns = ['Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 
+                   'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+
+    # Hue parameter
+    hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)
+
+    # Botão "Visualizar"
+    if st.button('Visualizar'):
+
+        # Filtrar os dados com base nos valores selecionados
+        filtered_data = apply_filtros(df, vars_filtros)
+
+        for option in eg_columns:
+            # Filtrar os dados para remover NaN de 'option'
+            filtered_data = filtered_data[~filtered_data[option].isna()]
+
+            # Display a bar plot
+            fig, ax = plt.subplots(figsize=(10,5))
+            plt.title(f'Contagem do atributo {option}')
+            if hue_option != 'Nenhum':
+                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
+            else:
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=filtered_data[option].unique())
+
+            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
+
+            # Add the values on top of each bar
+            for p in plot.patches:
+                plot.annotate(format(p.get_height(), '.0f'), 
+                            (p.get_x() + p.get_width() / 2., p.get_height()), 
+                            ha = 'center', 
+                            va = 'center', 
+                            xytext = (0, 10), 
+                            textcoords = 'offset points')
+
+            st.pyplot(fig)
+
+elif selected_tab == "Egressos: Estudo Relação":
+
+    st.title("Egressos: Estudo Relação")
+
+    # Filtros
+    vars_filtros = show_filtros(df)
+    
+    # Sidebar
+    eg_columns = ['ESTUDO_RELACAO']
+    
+    hue_columns = ['Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 
+                   'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+
+    # Hue parameter
+    hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)
+
+    # Botão "Visualizar"
+    if st.button('Visualizar'):
+
+        # Filtrar os dados com base nos valores selecionados
+        filtered_data = apply_filtros(df, vars_filtros)
+
+        for option in eg_columns:
+            # Filtrar os dados para remover NaN de 'option'
+            filtered_data = filtered_data[~filtered_data[option].isna()]
+
+            # Display a bar plot
+            fig, ax = plt.subplots(figsize=(10,5))
+            plt.title(f'Contagem do atributo {option}')
+            if hue_option != 'Nenhum':
+                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
+            else:
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=filtered_data[option].unique())
+
+            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
+
+            # Add the values on top of each bar
+            for p in plot.patches:
+                plot.annotate(format(p.get_height(), '.0f'), 
+                            (p.get_x() + p.get_width() / 2., p.get_height()), 
+                            ha = 'center', 
+                            va = 'center', 
+                            xytext = (0, 10), 
+                            textcoords = 'offset points')
+
+            st.pyplot(fig)
+
+elif selected_tab == "Egressos: Trabalho":
+
+    st.title("Egressos: Trabalho")
+
+    # Filtros
+    vars_filtros = show_filtros(df)
+    
+    # Sidebar
+    eg_columns = ['TRAB_SITUACAO', 'TRAB_OCUPACAO', 'TRAB_AREA', 'TRAB_CAPACITACAO']
+    
+    hue_columns = ['Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 
+                   'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+
+    # Hue parameter
+    hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)
+
+    # Botão "Visualizar"
+    if st.button('Visualizar'):
+
+        # Filtrar os dados com base nos valores selecionados
+        filtered_data = apply_filtros(df, vars_filtros)
+
+        for option in eg_columns:
+            # Filtrar os dados para remover NaN de 'option'
+            filtered_data = filtered_data[~filtered_data[option].isna()]
+
+            # Display a bar plot
+            fig, ax = plt.subplots(figsize=(10,5))
+            plt.title(f'Contagem do atributo {option}')
+            if hue_option != 'Nenhum':
+                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
+            else:
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=filtered_data[option].unique())
+
+            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
+
+            # Add the values on top of each bar
+            for p in plot.patches:
+                plot.annotate(format(p.get_height(), '.0f'), 
+                            (p.get_x() + p.get_width() / 2., p.get_height()), 
+                            ha = 'center', 
+                            va = 'center', 
+                            xytext = (0, 10), 
+                            textcoords = 'offset points')
+
+            st.pyplot(fig)
