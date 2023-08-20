@@ -34,12 +34,18 @@ def plot_kde_renda(data, tipo):
     plt.tight_layout()
     st.pyplot(plt)
 
-def plot_boxplot_renda(data):
+def plot_boxplot_renda(data, hue_option):
     plt.figure(figsize=(12, 6))
 
-    sns.violinplot(data=data, x="Situação no Curso", y="Renda Per Capita", hue="Tipo de Escola de Origem", split=True)
+    #sns.violinplot(data=data, x="Situação no Curso", y="Renda Per Capita", hue="Tipo de Escola de Origem", split=True)
 
-    plt.title(f"Violino da Renda por Situação no Curso e Tipo de Escola de Origem")
+    if hue_option != 'Nenhum':
+        sns.boxplot(data=data, x="Renda Per Capita", y="Situação no Curso", hue=hue_option, orient="h")
+    else:
+        sns.boxplot(data=data, x="Renda Per Capita", y="Situação no Curso", orient="h")
+
+
+    plt.title(f"Boxplot da Renda por Situação no Curso agregado por {hue_option}")
     #plt.xlabel("Renda")
     #plt.ylabel("Densidade")
     #plt.tight_layout()
@@ -116,6 +122,7 @@ tabs = [
         "Egressos: Estudo Relação", 
         "Egressos: Trabalho"
         ]
+
 
 selected_tab = st.sidebar.radio("Escolha uma aba:", tabs)
 
@@ -291,6 +298,12 @@ elif selected_tab == "Evasão/Retenção: Renda":
     # Filtros
     vars_filtros = show_filtros(df)
 
+    hue_columns = ['Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 
+                   'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+
+    # Hue parameter
+    hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)    
+
     # Botão "Visualizar"
     if st.button('Visualizar'):
         # Filtrar os dados com base nos valores selecionados
@@ -303,7 +316,7 @@ elif selected_tab == "Evasão/Retenção: Renda":
         # Chamar a função para gerar o gráfico
         plot_kde_renda(filtered_data, 4)
         plot_kde_renda(filtered_data, 6)
-        plot_boxplot_renda(filtered_data)
+        plot_boxplot_renda(filtered_data, hue_option)
 
 elif selected_tab == "Evasão: Motivação":
 
