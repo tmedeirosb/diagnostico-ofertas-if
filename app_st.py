@@ -40,12 +40,24 @@ def plot_boxplot_renda(data, hue_option):
     #sns.violinplot(data=data, x="Situação no Curso", y="Renda Per Capita", hue="Tipo de Escola de Origem", split=True)
 
     if hue_option != 'Nenhum':
-        sns.boxplot(data=data, x="Renda Per Capita", y="Situação no Curso", hue=hue_option, orient="h")
+        #sns.boxenplot(data=data, x="Renda Per Capita", y="Situação no Curso", hue=hue_option, orient="h", scale="linear")
+        sns.violinplot(data=data, x="Renda Per Capita", y="Situação no Curso", hue=hue_option, orient="h", cut=0)
     else:
-        sns.boxplot(data=data, x="Renda Per Capita", y="Situação no Curso", orient="h")
+        #sns.boxenplot(data=data, x="Renda Per Capita", y="Situação no Curso", orient="h", scale="linear")
+        sns.violinplot(data=data, x="Renda Per Capita", y="Situação no Curso", orient="h", cut=0)
 
-
+    # Configurar as marcas no eixo x
+    x_start = 0  
+    x_end = data['Renda Per Capita'].max() + 0.25  
+    x_step = 0.25
+    plt.xticks(np.arange(x_start, x_end, x_step), rotation=90)
+    plt.grid(axis='x', linestyle='--', which='both', linewidth=0.5, alpha=1.)
     plt.title(f"Boxplot da Renda por Situação no Curso agregado por {hue_option}")
+
+    # Deslocar os rótulos do eixo y para a esquerda
+    #ax = plt.gca()
+    #ax.set_yticklabels(ax.get_yticklabels(), position=(0.5, 0))    
+    
     #plt.xlabel("Renda")
     #plt.ylabel("Densidade")
     #plt.tight_layout()
