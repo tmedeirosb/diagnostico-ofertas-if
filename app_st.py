@@ -63,6 +63,32 @@ def plot_boxplot_renda(data, hue_option):
     #plt.tight_layout()
     st.pyplot(plt)
 
+def plot_graph_egressos(eg_columns, filtered_data, hue_option):
+    for option in eg_columns:
+        # Filtrar os dados para remover NaN de 'option'
+        filtered_data = filtered_data[~filtered_data[option].isna()]
+
+        # Display a bar plot
+        fig, ax = plt.subplots(figsize=(10,5))
+        plt.title(f'Contagem do atributo {option}')
+        if hue_option != 'Nenhum':
+            plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax, order=sorted(filtered_data[option].unique()))
+        else:
+            plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
+
+        plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
+
+        # Add the values on top of each bar
+        for p in plot.patches:
+            plot.annotate(format(p.get_height(), '.0f'), 
+                        (p.get_x() + p.get_width() / 2., p.get_height()), 
+                        ha = 'center', 
+                        va = 'center', 
+                        xytext = (0, 10), 
+                        textcoords = 'offset points')
+
+        st.pyplot(fig)    
+
 def show_filtros(df):
     # Filtros
     st.sidebar.header("Filtros")
@@ -120,6 +146,14 @@ df = df[df['Tipo de Escola de Origem'].isin(['Pública', 'Privada'])]
 attributes_options = ['Campus', 'curso', 'Descrição do Curso', 
                       'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 
                       'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+
+st.sidebar.markdown(
+    f"Diagnóstico de Ofertas: IFRN <br/> ASITEC/PROEN <br/>"
+    f"asitec.re@ifrn.edu.br <br/> v. 0.1 <br/>"
+    f"Atualizado em: 21/08/2023",
+    unsafe_allow_html=True
+)
+
 
 # Tabs
 tabs = [
@@ -395,30 +429,8 @@ elif selected_tab == "Egressos: Avaliação do Curso":
         # Filtrar os dados com base nos valores selecionados
         filtered_data = apply_filtros(df, vars_filtros)
 
-        for option in eg_columns:
-            # Filtrar os dados para remover NaN de 'option'
-            filtered_data = filtered_data[~filtered_data[option].isna()]
-
-            # Display a bar plot
-            fig, ax = plt.subplots(figsize=(10,5))
-            plt.title(f'Contagem do atributo {option}')
-            if hue_option != 'Nenhum':
-                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
-            else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
-
-            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
-
-            # Add the values on top of each bar
-            for p in plot.patches:
-                plot.annotate(format(p.get_height(), '.0f'), 
-                            (p.get_x() + p.get_width() / 2., p.get_height()), 
-                            ha = 'center', 
-                            va = 'center', 
-                            xytext = (0, 10), 
-                            textcoords = 'offset points')
-
-            st.pyplot(fig)
+        #plot os gráficios de egressos
+        plot_graph_egressos(eg_columns, filtered_data, hue_option)
         
 elif selected_tab == "Egressos: Prática":
 
@@ -443,30 +455,8 @@ elif selected_tab == "Egressos: Prática":
         # Filtrar os dados com base nos valores selecionados
         filtered_data = apply_filtros(df, vars_filtros)
 
-        for option in eg_columns:
-            # Filtrar os dados para remover NaN de 'option'
-            filtered_data = filtered_data[~filtered_data[option].isna()]
-
-            # Display a bar plot
-            fig, ax = plt.subplots(figsize=(10,5))
-            plt.title(f'Contagem do atributo {option}')
-            if hue_option != 'Nenhum':
-                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
-            else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
-
-            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
-
-            # Add the values on top of each bar
-            for p in plot.patches:
-                plot.annotate(format(p.get_height(), '.0f'), 
-                            (p.get_x() + p.get_width() / 2., p.get_height()), 
-                            ha = 'center', 
-                            va = 'center', 
-                            xytext = (0, 10), 
-                            textcoords = 'offset points')
-
-            st.pyplot(fig)
+        #plot os gráficios de egressos
+        plot_graph_egressos(eg_columns, filtered_data, hue_option)
 
 elif selected_tab == "Egressos: Escolaridade":
 
@@ -490,30 +480,8 @@ elif selected_tab == "Egressos: Escolaridade":
         # Filtrar os dados com base nos valores selecionados
         filtered_data = apply_filtros(df, vars_filtros)
 
-        for option in eg_columns:
-            # Filtrar os dados para remover NaN de 'option'
-            filtered_data = filtered_data[~filtered_data[option].isna()]
-
-            # Display a bar plot
-            fig, ax = plt.subplots(figsize=(10,5))
-            plt.title(f'Contagem do atributo {option}')
-            if hue_option != 'Nenhum':
-                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
-            else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
-
-            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
-
-            # Add the values on top of each bar
-            for p in plot.patches:
-                plot.annotate(format(p.get_height(), '.0f'), 
-                            (p.get_x() + p.get_width() / 2., p.get_height()), 
-                            ha = 'center', 
-                            va = 'center', 
-                            xytext = (0, 10), 
-                            textcoords = 'offset points')
-
-            st.pyplot(fig)
+        #plot os gráficios de egressos
+        plot_graph_egressos(eg_columns, filtered_data, hue_option)
 
 elif selected_tab == "Egressos: Estudo Relação":
 
@@ -537,30 +505,8 @@ elif selected_tab == "Egressos: Estudo Relação":
         # Filtrar os dados com base nos valores selecionados
         filtered_data = apply_filtros(df, vars_filtros)
 
-        for option in eg_columns:
-            # Filtrar os dados para remover NaN de 'option'
-            filtered_data = filtered_data[~filtered_data[option].isna()]
-
-            # Display a bar plot
-            fig, ax = plt.subplots(figsize=(10,5))
-            plt.title(f'Contagem do atributo {option}')
-            if hue_option != 'Nenhum':
-                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
-            else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
-
-            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
-
-            # Add the values on top of each bar
-            for p in plot.patches:
-                plot.annotate(format(p.get_height(), '.0f'), 
-                            (p.get_x() + p.get_width() / 2., p.get_height()), 
-                            ha = 'center', 
-                            va = 'center', 
-                            xytext = (0, 10), 
-                            textcoords = 'offset points')
-
-            st.pyplot(fig)
+        #plot os gráficios de egressos
+        plot_graph_egressos(eg_columns, filtered_data, hue_option)
 
 elif selected_tab == "Egressos: Trabalho":
 
@@ -584,27 +530,5 @@ elif selected_tab == "Egressos: Trabalho":
         # Filtrar os dados com base nos valores selecionados
         filtered_data = apply_filtros(df, vars_filtros)
 
-        for option in eg_columns:
-            # Filtrar os dados para remover NaN de 'option'
-            filtered_data = filtered_data[~filtered_data[option].isna()]
-
-            # Display a bar plot
-            fig, ax = plt.subplots(figsize=(10,5))
-            plt.title(f'Contagem do atributo {option}')
-            if hue_option != 'Nenhum':
-                plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
-            else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
-
-            plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
-
-            # Add the values on top of each bar
-            for p in plot.patches:
-                plot.annotate(format(p.get_height(), '.0f'), 
-                            (p.get_x() + p.get_width() / 2., p.get_height()), 
-                            ha = 'center', 
-                            va = 'center', 
-                            xytext = (0, 10), 
-                            textcoords = 'offset points')
-
-            st.pyplot(fig)
+        #plot os gráficios de egressos
+        plot_graph_egressos(eg_columns, filtered_data, hue_option)
