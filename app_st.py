@@ -390,20 +390,22 @@ elif selected_tab == "Egressos: Avaliação do Curso":
     # Hue parameter
     hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)
 
-    # Botão "Visualizar"
     if st.button('Visualizar'):
 
         # Filtrar os dados com base nos valores selecionados
         filtered_data = apply_filtros(df, vars_filtros)
 
         for option in eg_columns:
+            # Filtrar os dados para remover NaN de 'option'
+            filtered_data = filtered_data[~filtered_data[option].isna()]
+
             # Display a bar plot
             fig, ax = plt.subplots(figsize=(10,5))
-            plt.title(f'Satisfação do atributo {option}')
+            plt.title(f'Contagem do atributo {option}')
             if hue_option != 'Nenhum':
                 plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
             else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax)
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
 
             plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
 
@@ -436,20 +438,22 @@ elif selected_tab == "Egressos: Prática":
     # Hue parameter
     hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)
 
-    # Botão "Visualizar"
     if st.button('Visualizar'):
 
         # Filtrar os dados com base nos valores selecionados
         filtered_data = apply_filtros(df, vars_filtros)
 
         for option in eg_columns:
+            # Filtrar os dados para remover NaN de 'option'
+            filtered_data = filtered_data[~filtered_data[option].isna()]
+
             # Display a bar plot
             fig, ax = plt.subplots(figsize=(10,5))
             plt.title(f'Contagem do atributo {option}')
             if hue_option != 'Nenhum':
                 plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
             else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax)
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
 
             plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
 
@@ -496,7 +500,7 @@ elif selected_tab == "Egressos: Escolaridade":
             if hue_option != 'Nenhum':
                 plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
             else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=filtered_data[option].unique())
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
 
             plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
 
@@ -543,7 +547,7 @@ elif selected_tab == "Egressos: Estudo Relação":
             if hue_option != 'Nenhum':
                 plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
             else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=filtered_data[option].unique())
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
 
             plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
 
@@ -590,7 +594,7 @@ elif selected_tab == "Egressos: Trabalho":
             if hue_option != 'Nenhum':
                 plot = sns.countplot(data=filtered_data, x=option, hue=hue_option, ax=ax)
             else:
-                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=filtered_data[option].unique())
+                plot = sns.countplot(data=filtered_data, x=option, ax=ax, order=sorted(filtered_data[option].unique()))
 
             plot.set_xticklabels(plot.get_xticklabels(), rotation=90)
 
