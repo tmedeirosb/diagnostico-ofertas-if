@@ -86,7 +86,7 @@ def plot_graph_egressos(eg_columns, filtered_data, hue_option):
                         va = 'center', 
                         xytext = (0, 10), 
                         textcoords = 'offset points')
-
+        
         st.pyplot(fig)    
 
 def show_filtros(df):
@@ -149,7 +149,7 @@ attributes_options = ['Campus', 'curso', 'Descrição do Curso',
 
 st.sidebar.markdown(
     f"Diagnóstico de Ofertas: IFRN <br/> ASITEC/PROEN <br/>"
-    f"asitec.re@ifrn.edu.br <br/> v. 0.1 <br/>"
+    f"thiago.medeiros@ifrn.edu.br <br/> v. 0.1 <br/>"
     f"Atualizado em: 21/08/2023",
     unsafe_allow_html=True
 )
