@@ -158,7 +158,7 @@ st.sidebar.markdown(
 # Tabs
 tabs = [
         "Sobre", 
-        "Evasão/Retenção: Geral", 
+        "Geral", 
         "Evasão/Retenção: Detalhado", 
         "Evasão/Retenção: Renda", 
         "Evasão: Motivação", 
@@ -183,8 +183,8 @@ if selected_tab == "Sobre":
         filtered_data = apply_filtros(df, vars_filtros)
         st.write(filtered_data.drop('Unnamed: 0', axis='columns').head(qnt_registros))
 
-elif selected_tab == "Evasão/Retenção: Geral":
-    st.title("Evasão/Retenção: Geral")
+elif selected_tab == "Geral":
+    st.title("Geral")
 
     # Add multiselect for the user to choose filters (with "Nenhum" option)
     situacoes_to_display = st.sidebar.multiselect('Selecione as situações a serem exibidas:', list(df['Situação no Curso'].unique()))
