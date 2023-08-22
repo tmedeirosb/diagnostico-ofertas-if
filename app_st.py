@@ -219,7 +219,7 @@ elif selected_tab == "Geral":
             fig, ax = plt.subplots(figsize=(15, 10))
 
             if values_or_percentage == 'Valores Absolutos':
-                plot = sns.countplot(data=df, x=attribute1, hue='Situação no Curso', order=df[attribute1].value_counts().index, hue_order=situacoes_to_display, ax=ax)
+                plot = sns.countplot(data=df, x=attribute1, hue='Situação no Curso', order=df[attribute1].unique(), hue_order=situacoes_to_display, ax=ax)
                 table_data = df.groupby(attribute1)['Situação no Curso'].value_counts().unstack().fillna(0)
             else:
                 # For percentage, we need to adjust the data
@@ -227,9 +227,11 @@ elif selected_tab == "Geral":
                 status_counts = df.groupby(attribute1)['Situação no Curso'].value_counts()
                 status_percentage = status_counts.div(total_counts, level=0) * 100
                 status_percentage = status_percentage.reset_index(name='Percentage')
-                plot = sns.barplot(data=status_percentage, x=attribute1, y='Percentage', hue='Situação no Curso', order=df[attribute1].value_counts().index, hue_order=situacoes_to_display, ax=ax)
+                plot = sns.barplot(data=status_percentage, x=attribute1, y='Percentage', hue='Situação no Curso', order=df[attribute1].unique(), hue_order=situacoes_to_display, ax=ax)
                 table_data = status_percentage.pivot(index=attribute1, columns='Situação no Curso', values='Percentage')
 
+            # Para fazer os rótulos do eixo x aparecerem na vertical
+            ax.set_xticklabels(ax.get_xticklabels(), rotation=90, ha="right")
             ax.set_title('Situação no Curso por ' + attribute1)
             ax.set_xlabel(attribute1)
             ax.set_ylabel('Quantidade' if values_or_percentage == 'Valores Absolutos' else 'Percentual (%)')
@@ -260,6 +262,9 @@ elif selected_tab == "Geral":
                 # Sort based on the order you specified
                 pivot_df = pivot_df.reindex(filtered_data[attribute1].value_counts().index)
 
+                # Sort by the index (attribute1) alphabetically
+                pivot_df = pivot_df.sort_index()
+
                 # Plot
                 pivot_df.plot(kind='bar', stacked=True, ax=ax)
 
@@ -281,6 +286,9 @@ elif selected_tab == "Geral":
 
                 # Assuming your DataFrame is prepared properly for this
                 df_plot = status_percentage.pivot_table(index=attribute1, columns='Situação no Curso', values='Percentage', aggfunc='sum')
+
+                # Sort by the index (attribute1) alphabetically
+                df_plot = df_plot.sort_index()
 
                 # This will create a stacked bar plot
                 df_plot[situacoes_to_display].plot(kind='bar', stacked=True, ax=ax)
