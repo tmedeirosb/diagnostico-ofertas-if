@@ -248,6 +248,73 @@ elif selected_tab == "Geral":
                 table_data.loc['Total'] = table_data.sum()
                 st.write(table_data)
 
+            #------ GRAFICO EMPILHADO ------#
+            #grafico empilhado
+            fig, ax = plt.subplots(figsize=(15, 10))
+            filtered_data = df[df['Situação no Curso'].isin(situacoes_to_display)]
+
+            if values_or_percentage == 'Valores Absolutos':
+                # Create a pivot table
+                pivot_df = filtered_data.groupby([attribute1, 'Situação no Curso']).size().unstack()
+
+                # Sort based on the order you specified
+                pivot_df = pivot_df.reindex(filtered_data[attribute1].value_counts().index)
+
+                # Plot
+                pivot_df.plot(kind='bar', stacked=True, ax=ax)
+
+                # Calculate the total height (sum) for each bar and annotate the plot
+                totals = pivot_df.sum(axis=1)
+                for i, total in enumerate(totals):
+                    ax.text(i, total + 0.5, f'{int(total)}', ha='center', va='bottom')  # The 0.5 is for a slight offset, you can adjust as needed
+
+
+
+                #plot = sns.countplot(data=df, x=attribute1, hue='Situação no Curso', order=df[attribute1].value_counts().index, hue_order=situacoes_to_display, ax=ax)
+            else:
+                # For percentage, we need to adjust the data
+                total_counts = df[attribute1].value_counts()
+                status_counts = df.groupby(attribute1)['Situação no Curso'].value_counts()
+                status_percentage = status_counts.div(total_counts, level=0) * 100
+                status_percentage = status_percentage.reset_index(name='Percentage')
+                #plot = sns.barplot(data=status_percentage, x=attribute1, y='Percentage', hue='Situação no Curso', order=df[attribute1].value_counts().index, hue_order=situacoes_to_display, ax=ax, stacked=True)
+
+                # Assuming your DataFrame is prepared properly for this
+                df_plot = status_percentage.pivot_table(index=attribute1, columns='Situação no Curso', values='Percentage', aggfunc='sum')
+
+                # This will create a stacked bar plot
+                df_plot[situacoes_to_display].plot(kind='bar', stacked=True, ax=ax)
+
+                totals = df_plot[situacoes_to_display].sum(axis=1)  # Get the total height for each bar
+                # Annotate the bars with their total sums
+                for i, total in enumerate(totals):
+                    ax.annotate(f'{total:.0f}', (i, total + 1), ha='center', va='bottom')  # Adjust the `+ 1` for vertical spacing if needed
+                    #ax.text(i, total + 0.5, f'{int(total)}', ha='center', va='bottom')  # The 0.5 is for a slight offset, you can adjust as needed
+
+
+            ax.set_title('Situação no Curso por ' + attribute1)
+            ax.set_xlabel(attribute1)
+            ax.set_ylabel('Quantidade' if values_or_percentage == 'Valores Absolutos' else 'Percentual (%)')
+            ax.legend(title='Situação no Curso')
+
+            # Annotate the bars with their sums
+            for p in ax.patches:
+                width = p.get_width()
+                height = p.get_height()
+                x, y = p.get_xy()
+                
+                # Check if the height (value) is not too small to prevent overlapping annotations
+                if height > 2:  # or any other threshold that suits your data
+                    ax.annotate(f'{height:.0f}', (x + width/2, y + height/2), ha='center', va='center')
+
+            # Display the values on top of each bar
+            #for p in plot.patches:
+            #    plot.annotate(format(p.get_height(), '.1f'), (p.get_x() + p.get_width() / 2., p.get_height()), ha='center', va='center', xytext=(0, 10), textcoords='offset points')
+
+            # Show the plot
+            st.pyplot(fig)
+            
+
 elif selected_tab == "Evasão/Retenção: Detalhado":
     
     st.title("Evasão/Retenção: Detalhado")
