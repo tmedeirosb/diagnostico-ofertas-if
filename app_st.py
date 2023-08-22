@@ -195,11 +195,13 @@ elif selected_tab == "Geral":
     modalidade = st.sidebar.selectbox('Selecione a modalidade:', ['Todos'] + list(df['Modalidade'].unique()))
     tipo_escola_origem = st.sidebar.selectbox('Selecione o tipo de escola de origem:', ['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
 
+    filtered_data = df.copy()
+
     # Apply filters based on the selected options (skip if "Todos" is selected)
     if modalidade != 'Todos':
-        df = df[df['Modalidade'] == modalidade]
+        filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade]
     if tipo_escola_origem != 'Todos':
-        df = df[df['Tipo de Escola de Origem'] == tipo_escola_origem]
+        filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == tipo_escola_origem]
 
     # Add selectbox for the user to choose one attribute
     attribute1 = st.sidebar.selectbox('Selecione o atributo:', attributes_options)
@@ -219,15 +221,15 @@ elif selected_tab == "Geral":
             fig, ax = plt.subplots(figsize=(15, 10))
 
             if values_or_percentage == 'Valores Absolutos':
-                plot = sns.countplot(data=df, x=attribute1, hue='Situação no Curso', order=df[attribute1].unique(), hue_order=situacoes_to_display, ax=ax)
-                table_data = df.groupby(attribute1)['Situação no Curso'].value_counts().unstack().fillna(0)
+                plot = sns.countplot(data=filtered_data, x=attribute1, hue='Situação no Curso', order=filtered_data[attribute1].unique(), hue_order=situacoes_to_display, ax=ax)
+                table_data = filtered_data.groupby(attribute1)['Situação no Curso'].value_counts().unstack().fillna(0)
             else:
                 # For percentage, we need to adjust the data
-                total_counts = df[attribute1].value_counts()
-                status_counts = df.groupby(attribute1)['Situação no Curso'].value_counts()
+                total_counts = filtered_data[attribute1].value_counts()
+                status_counts = filtered_data.groupby(attribute1)['Situação no Curso'].value_counts()
                 status_percentage = status_counts.div(total_counts, level=0) * 100
                 status_percentage = status_percentage.reset_index(name='Percentage')
-                plot = sns.barplot(data=status_percentage, x=attribute1, y='Percentage', hue='Situação no Curso', order=df[attribute1].unique(), hue_order=situacoes_to_display, ax=ax)
+                plot = sns.barplot(data=status_percentage, x=attribute1, y='Percentage', hue='Situação no Curso', order=filtered_data[attribute1].unique(), hue_order=situacoes_to_display, ax=ax)
                 table_data = status_percentage.pivot(index=attribute1, columns='Situação no Curso', values='Percentage')
 
             # Para fazer os rótulos do eixo x aparecerem na vertical
@@ -253,7 +255,7 @@ elif selected_tab == "Geral":
             #------ GRAFICO EMPILHADO ------#
             #grafico empilhado
             fig, ax = plt.subplots(figsize=(15, 10))
-            filtered_data = df[df['Situação no Curso'].isin(situacoes_to_display)]
+            filtered_data = filtered_data[filtered_data['Situação no Curso'].isin(situacoes_to_display)]
 
             if values_or_percentage == 'Valores Absolutos':
                 # Create a pivot table
@@ -278,8 +280,8 @@ elif selected_tab == "Geral":
                 #plot = sns.countplot(data=df, x=attribute1, hue='Situação no Curso', order=df[attribute1].value_counts().index, hue_order=situacoes_to_display, ax=ax)
             else:
                 # For percentage, we need to adjust the data
-                total_counts = df[attribute1].value_counts()
-                status_counts = df.groupby(attribute1)['Situação no Curso'].value_counts()
+                total_counts = filtered_data[attribute1].value_counts()
+                status_counts = filtered_data.groupby(attribute1)['Situação no Curso'].value_counts()
                 status_percentage = status_counts.div(total_counts, level=0) * 100
                 status_percentage = status_percentage.reset_index(name='Percentage')
                 #plot = sns.barplot(data=status_percentage, x=attribute1, y='Percentage', hue='Situação no Curso', order=df[attribute1].value_counts().index, hue_order=situacoes_to_display, ax=ax, stacked=True)
