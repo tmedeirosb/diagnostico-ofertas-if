@@ -367,7 +367,7 @@ elif selected_tab == "Evasão/Retenção: Detalhado":
                 ax.set_ylabel('Count' if values_or_percentage == 'Valores Absolutos' else 'Percentage (%)')
                 
                 for container in ax.containers:
-                    ax.bar_label(container)
+                    ax.bar_label(container, fmt='%.2f')
 
                 st.pyplot(fig)
                 
@@ -397,7 +397,7 @@ elif selected_tab == "Evasão/Retenção: Detalhado":
                 ax.set_ylabel('Count' if values_or_percentage == 'Valores Absolutos' else 'Percentage (%)')
                 
                 for container in ax.containers:
-                    ax.bar_label(container)
+                    ax.bar_label(container, fmt='%.2f')
                 
                 st.pyplot(fig)
                 
