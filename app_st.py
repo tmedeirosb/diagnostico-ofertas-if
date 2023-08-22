@@ -150,7 +150,7 @@ attributes_options = ['Campus', 'curso', 'Descrição do Curso',
 st.sidebar.markdown(
     f"Diagnóstico de Ofertas: IFRN <br/> ASITEC/PROEN <br/>"
     f"asitec.re@ifrn.edu.br <br/> v. 0.1 <br/>"
-    f"Atualizado em: 21/08/2023",
+    f"Atualizado em: 22/08/2023",
     unsafe_allow_html=True
 )
 
