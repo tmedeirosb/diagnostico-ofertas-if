@@ -698,7 +698,8 @@ elif selected_tab == "Socioeconômico: Geral":
             plt.legend(title=hue_option, bbox_to_anchor=(1.05, 1), loc='upper left')
         else:
             sns.barplot(y=top_values.index, x=top_values.values, palette="viridis")
-
+        
+        plt.xticks(rotation=90)
         plt.xlabel('Contagem')
         plt.ylabel('Contribuintes da Renda Familiar')
         plt.title('Top 10 Contribuintes da Renda Familiar')
