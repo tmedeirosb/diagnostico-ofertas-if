@@ -155,7 +155,7 @@ attributes_options = ['Campus', 'curso', 'Descrição do Curso',
 st.sidebar.markdown(
     f"Diagnóstico de Ofertas: IFRN <br/> ASITEC/PROEN <br/>"
     f"asitec.re@ifrn.edu.br <br/> v. 0.1 <br/>"
-    f"Atualizado em: 22/08/2023",
+    f"Atualizado em: 25/08/2023",
     unsafe_allow_html=True
 )
 
@@ -171,7 +171,8 @@ tabs = [
         "Egressos: Prática", 
         "Egressos: Escolaridade", 
         "Egressos: Estudo Relação", 
-        "Egressos: Trabalho"
+        "Egressos: Trabalho", 
+        "Socioeconômico: Geral",
         ]
 
 
@@ -604,6 +605,58 @@ elif selected_tab == "Egressos: Trabalho":
     
     # Sidebar
     eg_columns = ['TRAB_SITUACAO', 'TRAB_OCUPACAO', 'TRAB_AREA', 'TRAB_CAPACITACAO']
+    
+    hue_columns = ['Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 
+                   'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+
+    # Hue parameter
+    hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)
+
+    # Botão "Visualizar"
+    if st.button('Visualizar'):
+
+        # Filtrar os dados com base nos valores selecionados
+        filtered_data = apply_filtros(df, vars_filtros)
+
+        #plot os gráficios de egressos
+        plot_graph_egressos(eg_columns, filtered_data, hue_option)
+
+elif selected_tab == "Socioeconômico: Geral":
+    st.title("Socioeconômico: Geral")
+
+    # Filtros
+    vars_filtros = show_filtros(df)
+    
+    # Sidebar
+    eg_columns = [
+    'QTD FILHOS', 
+    'NECESSIDADE ESPECIAL', 'ALUNO EXCLUSIVO REDE PUBLICA', 
+    'ENSINO FUNDAMENTAL CONCLUSAO', 'ENSINO MEDIO CONCLUSAO', 
+    'FICOU TEMPO SEM ESTUDAR', 
+    'RAZAO AUSENCIA EDUCACIONAL', 'POSSUI CONHECIMENTO IDIOMAS', 
+    'IDIOMAS CONHECIDOS', 'POSSUI CONHECIMENTO INFORMATICA', 
+    'ESCOLA ENSINO FUNDAMENTAL', 'ESCOLA ENSINO MEDIO', 
+    'TRABALHO SITUACAO', 'RESPONSAVEL FINANCEIRO', 
+    'RESPONSAVEL FINANCEIR TRABALHO SITUACAO', 
+    'RESPONSAVEL FINANCEIRO NIVEL ESCOLARIDADE', 
+    'PAI NIVEL ESCOLARIDADE', 'MAE NIVEL ESCOLARIDADE', 
+    'COMPANHIA DOMICILIAR', 
+    'QTD PESSOAS DOMICILIO',   'TIPO IMOVEL RESIDENCIAL', 
+    'TIPO AREA RESIDENCIAL', 'MEIO TRANSPORTE UTILIZADO', 
+    'CONTRIBUINTES RENDA FAMILIAR', 'BENEFICIARIO PROGRAMA SOCIAL', 
+    'TIPO SERVICO SAUDE', 'FREQUENCIA ACESSO INTERNET', 
+    'LOCAL ACESSO INTERNET', 'QUANTIDADE COMPUTADORES', 
+    'QUANTIDADE NOTEBOOKS', 'QUANTIDADE NETBOOKS', 'QUANTIDADE SMARTPHONES'         
+    ]
+
+    eg_columns = [
+          'TIPO AREA RESIDENCIAL', 
+          #'CONTRIBUINTES RENDA FAMILIAR',
+          #'MEIO TRANSPORTE UTILIZADO', 
+          'POSSUI CONHECIMENTO INFORMATICA', 
+          'ESCOLA ENSINO FUNDAMENTAL', 
+          'ESCOLA ENSINO MEDIO',
+    ]    
     
     hue_columns = ['Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 
                    'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
