@@ -673,38 +673,34 @@ elif selected_tab == "Socioeconômico: Geral":
         #plot os gráficios de egressos
         plot_graph_egressos(eg_columns, filtered_data, hue_option)
 
-        #grafico CONTRIBUINTES RENDA FAMILIAR
-        # Contar os valores únicos
-        value_counts = filtered_data["CONTRIBUINTES RENDA FAMILIAR"].value_counts()
+        #grafico CONTRIBUINTES RENDA FAMILIAR e MEIO TRANSPORTE UTILIZADO
+        cols = ['CONTRIBUINTES RENDA FAMILIAR', 'MEIO TRANSPORTE UTILIZADO']
 
-        # Determinar a porcentagem de valores ausentes
-        #missing_percentage = (filtered_data["CONTRIBUINTES RENDA FAMILIAR"].isna().sum() / len(filtered_data)) * 100
+        for attr in cols:
 
-        # Visualizar a distribuição dos 10 valores mais frequentes
-        top_values = value_counts.head(10)
+            # Contar os valores únicos
+            value_counts = filtered_data[attr].value_counts()
 
-        #st.write(top_values)
+            # Visualizar a distribuição dos 10 valores mais frequentes
+            top_values = value_counts.head(10)
 
-        #fig, ax = plt.figure(figsize=(10, 6))
-        fig, ax = plt.subplots(figsize=(15, 10))
-        #sns.barplot(y=top_values.index, x=top_values.values, palette="viridis")
+            fig, ax = plt.subplots(figsize=(15, 10))
 
-        if hue_option != 'Nenhum':
-            #sns.barplot(y=top_values.index, x=top_values.values, palette="viridis", hue=hue_option)
-            # Repetindo a operação de agrupar e visualizar
-            grouped_data = filtered_data.groupby([hue_option, 'CONTRIBUINTES RENDA FAMILIAR']).size().reset_index(name='Count')
-            top_contribuintes_per_school = grouped_data.groupby(hue_option).apply(lambda x: x.nlargest(10, 'Count')).reset_index(drop=True)
-            sns.barplot(data=top_contribuintes_per_school, x='CONTRIBUINTES RENDA FAMILIAR', y='Count', hue=hue_option, palette='viridis')
-            plt.legend(title=hue_option, bbox_to_anchor=(1.05, 1), loc='upper left')
-            plt.xticks(rotation=90)
-        else:
-            sns.barplot(y=top_values.index, x=top_values.values, palette="viridis")
-        
-        plt.xlabel('Contagem')
-        plt.ylabel('Contribuintes da Renda Familiar')
-        plt.title('Top 10 Contribuintes da Renda Familiar')
-        plt.show()    
+            if hue_option != 'Nenhum':
+                #sns.barplot(y=top_values.index, x=top_values.values, palette="viridis", hue=hue_option)
+                # Repetindo a operação de agrupar e visualizar
+                grouped_data = filtered_data.groupby([hue_option, attr]).size().reset_index(name='Count')
+                top_contribuintes_per_school = grouped_data.groupby(hue_option).apply(lambda x: x.nlargest(10, 'Count')).reset_index(drop=True)
+                sns.barplot(data=top_contribuintes_per_school, x=attr, y='Count', hue=hue_option, palette='viridis')
+                plt.legend(title=hue_option, bbox_to_anchor=(1.05, 1), loc='upper left')
+                plt.xticks(rotation=90)
+            else:
+                sns.barplot(y=top_values.index, x=top_values.values, palette="viridis")
+            
+            plt.xlabel('Contagem')
+            plt.ylabel(attr)
+            plt.title(f'Top 10 {attr}')
+            plt.show()    
 
-        st.pyplot(fig)   
+            st.pyplot(fig)   
 
-        #st.write("aqui")    
