@@ -100,6 +100,7 @@ def show_filtros(df):
     ano_ingresso = st.sidebar.selectbox('Ano de Ingresso', options=['Todos'] + list(df['Ano de Ingresso'].unique()))
     periodo_atual = st.sidebar.selectbox('Período Atual', options=['Todos'] + list(df['Período Atual'].unique()))
     tipo_escola = st.sidebar.selectbox('Tipo de Escola de Origem', options=['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
+    turno = st.sidebar.selectbox('Turno', options=['Todos'] + list(df['Turno'].unique()))
 
     return {"modalidade_value": modalidade_value, 
             "campus": campus, 
@@ -108,7 +109,8 @@ def show_filtros(df):
             "ano_conclusao": ano_conclusao, 
             "ano_ingresso": ano_ingresso, 
             "periodo_atual": periodo_atual, 
-            "tipo_escola": tipo_escola}
+            "tipo_escola": tipo_escola, 
+            "turno": turno} 
 
 def apply_filtros(df, var):
     # Filtrar os dados com base nos valores selecionados
@@ -132,6 +134,9 @@ def apply_filtros(df, var):
         filtered_data = filtered_data[filtered_data['Modalidade'] == var['modalidade_value']]
     if var['tipo_escola'] != 'Todos':
         filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == var['tipo_escola']] 
+    if var['turno'] != 'Todos':
+        filtered_data = filtered_data[filtered_data['Turno'] == var['turno']] 
+
 
     return filtered_data
         
@@ -145,7 +150,7 @@ df = df[df['Tipo de Escola de Origem'].isin(['Pública', 'Privada'])]
 # Define the options for the attribute selection
 attributes_options = ['Campus', 'curso', 'Descrição do Curso', 
                       'Ano Letivo de Previsão de Conclusão', 'Ano de Ingresso', 
-                      'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+                      'Período Atual', 'Modalidade', 'Tipo de Escola de Origem', 'Turno']
 
 st.sidebar.markdown(
     f"Diagnóstico de Ofertas: IFRN <br/> ASITEC/PROEN <br/>"
@@ -194,6 +199,8 @@ elif selected_tab == "Geral":
 
     modalidade = st.sidebar.selectbox('Selecione a modalidade:', ['Todos'] + list(df['Modalidade'].unique()))
     tipo_escola_origem = st.sidebar.selectbox('Selecione o tipo de escola de origem:', ['Todos'] + list(df['Tipo de Escola de Origem'].unique()))
+    turno = st.sidebar.selectbox('Selecione o turno:', ['Todos'] + list(df['Turno'].unique()))
+    #Turno
 
     filtered_data = df.copy()
 
@@ -202,6 +209,9 @@ elif selected_tab == "Geral":
         filtered_data = filtered_data[filtered_data['Modalidade'] == modalidade]
     if tipo_escola_origem != 'Todos':
         filtered_data = filtered_data[filtered_data['Tipo de Escola de Origem'] == tipo_escola_origem]
+    if turno != 'Todos':
+        filtered_data = filtered_data[filtered_data['Turno'] == turno]
+
 
     # Add selectbox for the user to choose one attribute
     attribute1 = st.sidebar.selectbox('Selecione o atributo:', attributes_options)
@@ -422,7 +432,7 @@ elif selected_tab == "Evasão/Retenção: Renda":
     vars_filtros = show_filtros(df)
 
     hue_columns = ['Campus', 'curso', 'Descrição do Curso', 'Ano Letivo de Previsão de Conclusão', 
-                   'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem']
+                   'Ano de Ingresso', 'Período Atual', 'Modalidade', 'Tipo de Escola de Origem', 'Turno']
 
     # Hue parameter
     hue_option = st.sidebar.selectbox('Escolha o atributo para agregação (opcional)', ['Nenhum'] + hue_columns)    
