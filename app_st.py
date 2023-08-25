@@ -696,10 +696,10 @@ elif selected_tab == "Socioeconômico: Geral":
             top_contribuintes_per_school = grouped_data.groupby(hue_option).apply(lambda x: x.nlargest(10, 'Count')).reset_index(drop=True)
             sns.barplot(data=top_contribuintes_per_school, x='CONTRIBUINTES RENDA FAMILIAR', y='Count', hue=hue_option, palette='viridis')
             plt.legend(title=hue_option, bbox_to_anchor=(1.05, 1), loc='upper left')
+            plt.xticks(rotation=90)
         else:
             sns.barplot(y=top_values.index, x=top_values.values, palette="viridis")
         
-        plt.xticks(rotation=90)
         plt.xlabel('Contagem')
         plt.ylabel('Contribuintes da Renda Familiar')
         plt.title('Top 10 Contribuintes da Renda Familiar')
