@@ -165,6 +165,7 @@ tabs = [
         "Sobre", 
         "Geral", 
         "Evasão/Retenção: Detalhado", 
+        "Evasão/Retenção: 3 atributos",
         "Evasão/Retenção: Renda", 
         "Evasão: Motivação", 
         "Egressos: Avaliação do Curso", 
@@ -421,6 +422,111 @@ elif selected_tab == "Evasão/Retenção: Detalhado":
                 st.write(table)
             else:
                 st.error("Por favor, selecione valores para os atributos.")
+
+elif selected_tab == "Evasão/Retenção: 3 atributos":
+    
+    st.title("Evasão/Retenção: Detalhado")
+
+    st.sidebar.header("Visualização")
+    # Valores absolutos ou porcentagem
+    values_or_percentage = st.sidebar.selectbox('Selecione a forma de exibição:', ['Valores Absolutos', 'Porcentagem'])
+    
+    st.sidebar.header("Interação entre variáveis")
+    
+    # Seleção de atributos para interação
+    attribute1 = st.sidebar.selectbox('Seleção do atributo 1:', attributes_options)
+    attribute_values_1 = st.sidebar.multiselect(f'Valores para {attribute1}:', df[attribute1].unique())
+    attribute_filter_2 = st.sidebar.selectbox('Selecione o atributo 2 para filtrar (Opcional):', options=['Nenhum'] + attributes_options, index=0)
+
+    #filtra pelo atributo 1 o filtro 2
+    if attribute_values_1:
+        df_filtered_by_attr1 = df[df[attribute1].isin(attribute_values_1)]
+        if attribute_filter_2 != 'Nenhum':
+            attribute_values_filter_2 = st.sidebar.multiselect(f'Valores para {attribute_filter_2} (baseado em {attribute1}):', df_filtered_by_attr1[attribute_filter_2].unique())
+    else:
+        attribute_values_filter_2 = []
+
+    #atritubo para agrega
+    attribute2 = st.sidebar.selectbox('Selecione o atributo para agregar (Opcional):', options=['Nenhum'] + attributes_options, index=0)
+
+    #filtra pelo atributo 1 o atributo para agregar
+    if attribute_values_1:
+        df_filtered_by_attr1 = df[df[attribute1].isin(attribute_values_1)]
+        if attribute2 != 'Nenhum':
+            attribute_values_2 = st.sidebar.multiselect(f'Valores para {attribute2} (baseado em {attribute1}):', df_filtered_by_attr1[attribute2].unique())
+    else:
+        attribute_values_2 = []
+
+    # Botão para visualizar
+    if st.button('Visualizar'):
+
+        if attribute_filter_2 != 'Nenhum':
+            if attribute_values_filter_2:
+                df = df[df[attribute_filter_2].isin(attribute_values_filter_2)]
+
+        if attribute2 == 'Nenhum':
+            if attribute_values_1:
+                fig, ax = plt.subplots(figsize=(15, 10))
+                data = df[df[attribute1].isin(attribute_values_1)]
+
+                if values_or_percentage == 'Valores Absolutos':                    
+                    sns.countplot(data=data, x=attribute1, hue='Situação no Curso', ax=ax)
+                else:
+                    # This will be a bit complex for percentage, as we'll need to compute the percentage per each situation
+                    data_grouped = data.groupby([attribute1, 'Situação no Curso']).size().unstack(fill_value=0)
+                    total = data.groupby(attribute1).size()
+                    data_percentage = (data_grouped.divide(total, axis=0) * 100).fillna(0)
+                    data_percentage.plot(kind='bar', stacked=False, ax=ax)
+                
+                ax.set_title(f'{attribute1}')
+                ax.set_xlabel(attribute1)
+                ax.set_ylabel('Count' if values_or_percentage == 'Valores Absolutos' else 'Percentage (%)')
+                
+                for container in ax.containers:
+                    ax.bar_label(container, fmt='%.2f')
+
+                st.pyplot(fig)
+                
+                # Exibindo a tabela
+                table = data.groupby([attribute1, 'Situação no Curso']).size().unstack().fillna(0)
+                table['Total'] = table.sum(axis=1)
+                table.loc['Total'] = table.sum()
+                st.write(table) 
+            else:
+                st.error("Por favor, selecione valores para os atributos.")           
+
+        else:
+            if attribute_values_1 and attribute_values_2:
+                fig, ax = plt.subplots(figsize=(15, 10))
+                data = df[df[attribute1].isin(attribute_values_1) & df[attribute2].isin(attribute_values_2)]
+                if values_or_percentage == 'Valores Absolutos':
+                    sns.countplot(data=data, x=attribute2, hue='Situação no Curso', ax=ax)
+                else:
+                    # This will be a bit complex for percentage, as we'll need to compute the percentage per each situation
+                    data_grouped = data.groupby([attribute2, 'Situação no Curso']).size().unstack(fill_value=0)
+                    total = data.groupby(attribute2).size()
+                    data_percentage = (data_grouped.divide(total, axis=0) * 100).fillna(0)
+                    data_percentage.plot(kind='bar', stacked=False, ax=ax)
+                
+                ax.set_title(f'{attribute1} por {attribute2}')
+                ax.set_xlabel(attribute2)
+                ax.set_ylabel('Count' if values_or_percentage == 'Valores Absolutos' else 'Percentage (%)')
+                
+                for container in ax.containers:
+                    ax.bar_label(container, fmt='%.2f')
+                
+                st.pyplot(fig)
+                
+                # Exibindo a tabela
+                table = data.groupby([attribute2, 'Situação no Curso']).size().unstack().fillna(0)
+                table['Total'] = table.sum(axis=1)
+                table.loc['Total'] = table.sum()
+                st.write(table)
+            else:
+                st.error("Por favor, selecione valores para os atributos.")
+
+
+
 
 elif selected_tab == "Evasão/Retenção: Renda":
     st.title("Distribuição da Renda por Situação da Matrícula")
